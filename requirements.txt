@@ -1,0 +1,24 @@
+# Camera Server - dependencies
+#
+# This project uses FastAPI as the web framework, Uvicorn as the ASGI server,
+# and OpenCV for camera/video handling. The versions below are pinned for
+# reproducible installs. If you prefer to track latest compatible releases,
+# remove the '==' pins or replace with '>='. Optional packages like
+# `python-dotenv` and `aiofiles` are included for convenience.
+
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Computer vision / camera
+opencv-python==4.8.1.78
+
+# File upload support used by some FastAPI features
+python-multipart==0.0.6
+
+# Optional: load .env files locally and async file helpers
+python-dotenv==1.0.0
+aiofiles==23.2.1
+
+# Recommended: pin Starlette / Pydantic compatible with FastAPI
+starlette==0.27.0
+pydantic==2.5.0
