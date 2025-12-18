@@ -1,172 +1,74 @@
-Camera Pre/Post Trigger Server
+# Camera Pre/Post Trigger Server
 
-A lightweight FastAPI-based camera server designed to manage a persistent camera thread and record short pre-trigger and post-trigger video clips.
-The system is optimized for embedded / edge devices (Raspberry Pi, RockPi, industrial PCs) and supports HTTP triggering, background recording, and real-time log streaming via Server-Sent Events (SSE).
-Architecture Overview
+A lightweight **FastAPI-based camera server** designed to manage a persistent camera thread and record **short pre-trigger and post-trigger video clips**.
+
+The system is optimized for **embedded / edge devices** (Raspberry Pi, RockPi, industrial PCs) and supports **HTTP triggering**, **background recording**, and **real-time log streaming** via **Server-Sent Events (SSE)**.
+
+---
+
+## Architecture Overview
 
 Client / AGV / App
-→ HTTP Trigger
-→ FastAPI Server (main.py / api.py)
-→ Camera Thread (OpenCV Capture)
-→ Pre/Post Buffer + VideoWriter
-→ Video Clips (.mp4)
-Features
+|
+| HTTP Trigger
+v
+FastAPI Server (main.py / api.py)
+|
+| Lifespan
+v
+Camera Thread (OpenCV Capture)
+|
+| Pre/Post Buffer + VideoWriter
+v
+Video Clips (.mp4)
 
-Persistent camera lifecycle managed by FastAPI lifespan
+---
 
-Pre-trigger and post-trigger recording
+## Features
 
-Background recording thread (non-blocking API)
+- Persistent camera lifecycle managed by FastAPI lifespan
+- Pre-trigger and post-trigger recording
+- Background recording thread (non-blocking API)
+- OpenCV-based capture and encoding
+- HTTP trigger endpoint
+- Real-time log streaming via Server-Sent Events (SSE)
+- Minimal HTML log viewer
+- Thread-safe logging using `queue.Queue`
+- Clean startup and shutdown handling
+- Suitable for headless devices and `systemd` deployment
 
-OpenCV-based capture and encoding
+---
 
-HTTP trigger endpoint
-
-Real-time log streaming via Server-Sent Events (SSE)
-
-Minimal HTML log viewer
-
-Thread-safe logging using queue.Queue
-
-Clean startup and shutdown handling
-
-Suitable for headless devices and systemd deployment
-Project Structure
+## Project Structure
 
 camera_server/
-app/
-├─ api.py – FastAPI routes and lifespan
-├─ camera.py – Camera capture logic
-├─ recorder.py – Background recording thread
-├─ logging_utils.py – Thread-safe logging and SSE
-├─ config.py – Camera and recording parameters
-main.py – FastAPI entrypoint
-requirements.txt
-README.md
-Requirements
+├── app/
+│ ├── api.py # FastAPI routes and lifespan
+│ ├── camera.py # Camera capture logic
+│ ├── recorder.py # Background recording thread
+│ ├── logging_utils.py # Thread-safe logging and SSE
+│ └── config.py # Camera and recording parameters
+├── main.py # FastAPI entrypoint
+├── requirements.txt
+└── README.md
 
-Python 3.10 – 3.11 (recommended)
+---
 
-FastAPI
+## Requirements
 
-Uvicorn
+- Python **3.10 – 3.11** (recommended)
+- FastAPI
+- Uvicorn
+- OpenCV (`cv2`)
 
-OpenCV (cv2)
+> ⚠️ Python 3.13 is not recommended yet due to OpenCV wheel compatibility.
 
-Note: Python 3.13 is not recommended yet due to OpenCV wheel compatibility.
-Quick Start (Windows / PowerShell)
+---
 
-Create virtual environment
+## Quick Start (Windows / PowerShell)
 
+### Create virtual environment
+
+```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-
-Install dependencies
-
-pip install -r requirements.txt
-
-Run server (development)
-
-uvicorn main:app --reload
-
-Server address:
-http://127.0.0.1:8000
-API Endpoints
-
-GET /
-Health check
-Response: { "status": "ok" }
-
-GET /trigger
-Trigger a recording
-Response: { "success": true, "message": "Recording triggered" }
-
-GET /logs
-Stream logs via SSE
-
-GET /viewer
-Minimal HTML log viewer
-
-Configuration
-
-All camera and recording parameters are defined in:
-
-app/config.py
-
-Common parameters:
-
-CAMERA_INDEX
-
-FPS_TARGET
-
-FRAME_WIDTH
-
-FRAME_HEIGHT
-
-PRE_SECONDS
-
-POST_SECONDS
-
-FOURCC
-
-OUTPUT_DIR
-
-Concurrency Model
-
-Camera capture runs continuously in a background thread
-
-Recording is triggered via an event/flag
-
-OpenCV VideoWriter is blocking and runs in a dedicated thread
-
-Logs are pushed into a thread-safe queue
-
-SSE endpoint streams logs asynchronously
-
-This avoids blocking FastAPI’s event loop and keeps the system deterministic.
-
-Implementation Notes
-
-Uses FastAPI lifespan context manager
-
-Replaces deprecated @app.on_event startup/shutdown
-
-Ensures clean camera release and thread termination
-
-Designed for systemd auto-start on embedded devices
-
-Easy to extend with RTSP, object detection, or GPIO triggers
-
-Testing Imports
-
-python -c "import fastapi, uvicorn, cv2; print('imports OK')"
-
-Deployment (Linux / systemd)
-
-Recommended for Raspberry Pi / RockPi:
-
-Use absolute paths
-
-Do not depend on interactive login
-
-Run inside virtual environment
-
-(systemd service file can be provided on request)
-
-Limitations
-
-OpenCV encoding is CPU-bound
-
-No built-in object detection
-
-Intended for event-based recording, not continuous long recording
-
-License
-
-No license specified yet.
-Add a license if you plan to publish or redistribute this project.
-
-Author
-
-saccarozo03
-Camera & Embedded Vision Experiments
