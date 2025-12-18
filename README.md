@@ -72,3 +72,10 @@ camera_server/
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
+--- 
+## Install dependencies
+```powershell 
+pip install -r requirements.txt
+
+
+
