@@ -8,19 +8,28 @@ The system is optimized for **embedded / edge devices** (Raspberry Pi, RockPi, i
 
 ## Architecture Overview
 
-Client / AGV / App
-|
-| HTTP Trigger
-v
-FastAPI Server (main.py / api.py)
-|
-| Lifespan
-v
-Camera Thread (OpenCV Capture)
-|
-| Pre/Post Buffer + VideoWriter
-v
-Video Clips (.mp4)
+┌─────────────────────┐
+│  Client / AGV / App │
+└─────────┬───────────┘
+          │  HTTP Trigger
+          ▼
+┌──────────────────────────┐
+│     FastAPI Server       │
+│  (main.py / api.py)      │
+└─────────┬────────────────┘
+          │  Lifespan
+          ▼
+┌──────────────────────────┐
+│     Camera Thread        │
+│   (OpenCV Capture)       │
+└─────────┬────────────────┘
+          │  Pre/Post Buffer
+          │  + VideoWriter
+          ▼
+┌──────────────────────────┐
+│   Video Clips (.mp4)     │
+└──────────────────────────┘
+
 
 ---
 
@@ -76,6 +85,6 @@ python -m venv .venv
 ## Install dependencies
 ```powershell 
 pip install -r requirements.txt
-
+---
 
 
