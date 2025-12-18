@@ -6,19 +6,19 @@
 # remove the '==' pins or replace with '>='. Optional packages like
 # `python-dotenv` and `aiofiles` are included for convenience.
 
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+fastapi
+uvicorn[standard]
 
 # Computer vision / camera
-opencv-python==4.8.1.78
+opencv-python-headless
 
 # File upload support used by some FastAPI features
-python-multipart==0.0.6
+python-multipart
 
 # Optional: load .env files locally and async file helpers
-python-dotenv==1.0.0
-aiofiles==23.2.1
+python-dotenv
+aiofiles
 
 # Recommended: pin Starlette / Pydantic compatible with FastAPI
-starlette==0.27.0
-pydantic==2.5.0
+starlette
+pydantic
