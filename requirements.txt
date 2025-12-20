@@ -10,7 +10,11 @@ fastapi
 uvicorn[standard]
 
 # Computer vision / camera
+<<<<<<< HEAD
 opencv-python-headless
+=======
+opencv-python
+>>>>>>> b1367fb (Update requirements and ignore files)
 
 # File upload support used by some FastAPI features
 python-multipart
