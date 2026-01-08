@@ -17,21 +17,14 @@ from .camera import (
     get_items_after,
 )
 
-# LƯU TRÊN SSD (CHIA THEO NGÀY)
 LOCAL_VIDEO_DIR = Path("/mnt/ssd/camera_videos")
-
-# COPY LÊN WINDOWS SHARE
 REMOTE_ROOT_DIR = Path("/mnt/denso247")
-
 LOCAL_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 record_threads: List[threading.Thread] = []
 
 
 def _copy_to_share(local_path: Path, max_retry: int = 3, retry_sleep: float = 2.0) -> Tuple[bool, str]:
-    """
-    Copy file sang Windows share theo ngày
-    """
     date_str = datetime.now().strftime("%Y-%m-%d")
     remote_day_dir = REMOTE_ROOT_DIR / date_str
 
@@ -56,9 +49,7 @@ def _copy_to_share(local_path: Path, max_retry: int = 3, retry_sleep: float = 2.
 
 
 def _decode_jpeg(enc: Any) -> Any:
-    """
-    enc là numpy 1D do cv2.imencode trả về
-    """
+    # enc là numpy 1D do cv2.imencode trả về
     frame = cv2.imdecode(enc, cv2.IMREAD_COLOR)
     return frame
 
@@ -74,13 +65,7 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
         fps = float(FPS_TARGET)
 
     timestamp = int(time.time())
-
-    # ====== CHIA THƯ MỤC THEO NGÀY ======
-    day_str = datetime.now().strftime("%Y-%m-%d")
-    day_dir = LOCAL_VIDEO_DIR / day_str
-    day_dir.mkdir(parents=True, exist_ok=True)
-
-    local_path = day_dir / f"video_{timestamp}.mp4"
+    local_path = LOCAL_VIDEO_DIR / f"video_{timestamp}.mp4"
 
     writer = cv2.VideoWriter(str(local_path), FOURCC, fps, (width, height))
     if not writer.isOpened():
@@ -88,7 +73,6 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
         return
 
     log(f"[REC] Start recording local: {local_path} (fps={fps:.2f})")
-
     if pre_items:
         log(f"[REC] PRE count={len(pre_items)} span~{pre_items[-1][0] - pre_items[0][0]:.2f}s")
 
@@ -97,11 +81,12 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
         fr = _decode_jpeg(enc)
         if fr is None:
             continue
+        # đảm bảo đúng size writer
         if fr.shape[1] != width or fr.shape[0] != height:
             fr = cv2.resize(fr, (width, height))
         writer.write(fr)
 
-    # ===== POST (drain theo timestamp) =====
+    # ===== POST (drain by timestamp) =====
     end_ts = anchor_ts + POST_SECONDS
     last_written_ts = anchor_ts
 
@@ -113,6 +98,7 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
 
         if new_items:
             for ts, enc in new_items:
+                # chỉ ghi tới end_ts
                 if ts > end_ts:
                     last_written_ts = end_ts
                     break
@@ -120,7 +106,6 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
                 fr = _decode_jpeg(enc)
                 if fr is None:
                     continue
-
                 if fr.shape[1] != width or fr.shape[0] != height:
                     fr = cv2.resize(fr, (width, height))
 
@@ -132,6 +117,7 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
             idle += 1
             time.sleep(0.003)
 
+            # Log nếu camera bị đứng hoặc recorder không nhận frame mới
             if idle % 500 == 0:
                 remain = end_ts - last_written_ts
                 log(f"[REC][WARN] No new frames yet. remain~{remain:.2f}s")
@@ -149,25 +135,30 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
 def trigger_event() -> Tuple[bool, str]:
     """
     Trigger:
-      - anchor_ts = timestamp của frame mới nhất trong buffer
-      - PRE cắt theo anchor_ts
-      - POST drain (không hụt giây)
+      - anchor_ts = timestamp của frame mới nhất trong buffer tại thời điểm trigger
+      - PRE cắt theo anchor_ts (không dùng time.time để tránh lệch)
+      - POST drain từ anchor_ts -> anchor_ts + POST_SECONDS (không hụt giây)
     """
     buf = get_buffer_snapshot()
     if not buf:
         return False, "Buffer is empty"
 
+    # anchor_ts = frame mới nhất hiện có
     anchor_ts = buf[-1][0]
 
+    # Kiểm tra buffer có đủ pre không
     if (anchor_ts - buf[0][0]) < PRE_SECONDS:
         return False, "Buffer not full yet"
 
+    # Cắt PRE theo anchor_ts
     pre_items = [(ts, enc) for (ts, enc) in buf if (anchor_ts - PRE_SECONDS) <= ts <= anchor_ts]
 
+    # Lấy kích thước từ latest raw (nhẹ), fallback decode 1 frame nếu cần
     lf = get_latest_frame_raw()
     if lf is not None:
         h, w = lf.shape[:2]
     else:
+        # fallback: decode frame cuối
         fr = _decode_jpeg(buf[-1][1])
         if fr is None:
             return False, "Cannot decode frame"
