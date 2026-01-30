@@ -21,7 +21,7 @@ from .camera import (
 LOCAL_VIDEO_DIR = Path("/mnt/ssd/camera_videos")
 
 # COPY LÊN WINDOWS SHARE
-REMOTE_ROOT_DIR = Path("/mnt/denso247")
+REMOTE_ROOT_DIR = Path("/mnt/vision_new1")
 
 LOCAL_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
