@@ -10,14 +10,14 @@ The system is optimized for **embedded / edge devices** (Raspberry Pi, RockPi, i
 ```mermaid
 flowchart TD
 
-    %% ===== Node Styles =====
-    classDef client fill:#E3F2FD,stroke:#1565C0,stroke-width:2px;
-    classDef server fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px;
-    classDef camera fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px;
-    classDef output fill:#FCE4EC,stroke:#AD1457,stroke-width:2px;
+    %% ===== White Theme Styles =====
+    classDef client fill:#FFFFFF,stroke:#1565C0,stroke-width:2px,color:#000;
+    classDef server fill:#FFFFFF,stroke:#2E7D32,stroke-width:2px,color:#000;
+    classDef camera fill:#FFFFFF,stroke:#EF6C00,stroke-width:2px,color:#000;
+    classDef output fill:#FFFFFF,stroke:#AD1457,stroke-width:2px,color:#000;
 
     %% ===== Architecture Flow =====
-    A["Client / AGV / App"] -->|HTTP Trigger| B[FastAPI Server]
+    A["Client / AGV / App"] -->|HTTP Trigger| B["FastAPI Server"]
     B -->|Startup Event| C["Camera Thread<br/>OpenCV + Ring Buffer"]
     C -->|Encode + Save| D["Video Clips (.mp4)"]
 
