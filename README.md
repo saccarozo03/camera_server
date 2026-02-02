@@ -58,7 +58,7 @@ camera_server/
 ├── main.py # FastAPI entrypoint
 ├── requirements.txt
 └── README.md
-mermaid 
+```
 ---
 
 ## Requirements
