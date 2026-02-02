@@ -47,7 +47,7 @@ flowchart TD
 ---
 
 ## Project Structure
-
+```mermaid
 camera_server/
 ├── app/
 │ ├── api.py # FastAPI routes and lifespan
@@ -58,7 +58,7 @@ camera_server/
 ├── main.py # FastAPI entrypoint
 ├── requirements.txt
 └── README.md
-
+mermaid 
 ---
 
 ## Requirements
