@@ -49,16 +49,26 @@ flowchart TD
 ## Project Structure
 ---
 ```mermaid
-camera_server/
-├── app/
-│ ├── api.py # FastAPI routes and lifespan
-│ ├── camera.py # Camera capture logic
-│ ├── recorder.py # Background recording thread
-│ ├── logging_utils.py # Thread-safe logging and SSE
-│ └── config.py # Camera and recording parameters
-├── main.py # FastAPI entrypoint
-├── requirements.txt
-└── README.md
+graph LR
+    %% ===== Adaptive Styles =====
+    classDef folder stroke:#1565C0,stroke-width:2px,fill:none;
+    classDef file stroke:#2E7D32,stroke-width:1px,fill:none,stroke-dasharray: 5 5;
+
+    %% ===== Structure =====
+    Root["camera_server/"] --- App["app/"]
+    Root --- Main["main.py"]
+    Root --- Req["requirements.txt"]
+    Root --- Readme["README.md"]
+
+    App --- API["api.py (FastAPI routes)"]
+    App --- Cam["camera.py (Capture logic)"]
+    App --- Rec["recorder.py (Background thread)"]
+    App --- Log["logging_utils.py (SSE)"]
+    App --- Conf["config.py (Params)"]
+
+    %% ===== Apply Styles =====
+    class Root,App folder
+    class Main,Req,Readme,API,Cam,Rec,Log,Conf file
 ```
 ---
 
