@@ -1,12 +1,14 @@
 # app/recorder.py
 import threading
 import time
-import shutil
+#import shutil
 from pathlib import Path
 from typing import Tuple, List, Any
 from datetime import datetime
 
+
 import cv2
+from .samba_uploader import upload_file_to_samba
 
 from .config import PRE_SECONDS, POST_SECONDS, FPS_TARGET, FOURCC
 from .logging_utils import log
@@ -21,38 +23,23 @@ from .camera import (
 LOCAL_VIDEO_DIR = Path("/mnt/ssd/camera_videos")
 
 # COPY LÊN WINDOWS SHARE
-REMOTE_ROOT_DIR = Path("/mnt/vision_new1")
+#REMOTE_ROOT_DIR = Path("/mnt/vision_new1")
 
 LOCAL_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 record_threads: List[threading.Thread] = []
 
 
-def _copy_to_share(local_path: Path, max_retry: int = 3, retry_sleep: float = 2.0) -> Tuple[bool, str]:
-    """
-    Copy file sang Windows share theo ngày
-    """
+def _upload_to_samba(local_path: Path):
     date_str = datetime.now().strftime("%Y-%m-%d")
-    remote_day_dir = REMOTE_ROOT_DIR / date_str
+    remote_path = f"{date_str}/{local_path.name}"
 
     try:
-        remote_day_dir.mkdir(parents=True, exist_ok=True)
+        upload_file_to_samba(local_path, remote_path)
+        return True, f"Uploaded: {remote_path}"
     except Exception as e:
-        return False, f"Cannot create remote day directory {remote_day_dir}: {e}"
+        return False, str(e)
 
-    remote_path = remote_day_dir / local_path.name
-
-    last_err = ""
-    for attempt in range(1, max_retry + 1):
-        try:
-            shutil.copy2(local_path, remote_path)
-            return True, f"Copied to {remote_path}"
-        except Exception as e:
-            last_err = str(e)
-            log(f"[UPLOAD][RETRY {attempt}/{max_retry}] {last_err}")
-            time.sleep(retry_sleep)
-
-    return False, f"Copy failed after {max_retry} retries: {last_err}"
 
 
 def _decode_jpeg(enc: Any) -> Any:
@@ -139,7 +126,8 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
     writer.release()
     log(f"[REC] Done recording local: {local_path}")
 
-    ok, msg = _copy_to_share(local_path, max_retry=3, retry_sleep=2.0)
+    ok, msg = _upload_to_samba(local_path)
+
     if ok:
         log(f"[UPLOAD] {msg}")
     else:
