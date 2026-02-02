@@ -17,9 +17,9 @@ flowchart TD
     classDef output fill:#FCE4EC,stroke:#AD1457,stroke-width:2px;
 
     %% ===== Architecture Flow =====
-    A[Client / AGV / App] -->|HTTP Trigger| B[FastAPI Server]
-    B -->|Startup Event| C[Camera Thread<br/>OpenCV + Ring Buffer]
-    C -->|Encode + Save| D[Video Clips (.mp4)]
+    A["Client / AGV / App"] -->|HTTP Trigger| B[FastAPI Server]
+    B -->|Startup Event| C["Camera Thread<br/>OpenCV + Ring Buffer"]
+    C -->|Encode + Save| D["Video Clips (.mp4)"]
 
     %% ===== Apply Styles =====
     class A client
@@ -28,7 +28,7 @@ flowchart TD
     class D output
 
 
-
+```
 ---
 
 ## Features
