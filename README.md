@@ -7,7 +7,7 @@ The system is optimized for **embedded / edge devices** (Raspberry Pi, RockPi, i
 ---
 
 ## Architecture Overview
-
+```mermaid
 flowchart TD
 
     A[Client / AGV / App] -->|HTTP Trigger| B[FastAPI Server]
