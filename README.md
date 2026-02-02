@@ -47,6 +47,7 @@ flowchart TD
 ---
 
 ## Project Structure
+---
 ```mermaid
 camera_server/
 ├── app/
