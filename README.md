@@ -10,11 +10,11 @@ The system is optimized for **embedded / edge devices** (Raspberry Pi, RockPi, i
 ```mermaid
 flowchart TD
 
-    %% ===== White Theme Styles =====
-    classDef client fill:#FFFFFF,stroke:#1565C0,stroke-width:2px,color:#000;
-    classDef server fill:#FFFFFF,stroke:#2E7D32,stroke-width:2px,color:#000;
-    classDef camera fill:#FFFFFF,stroke:#EF6C00,stroke-width:2px,color:#000;
-    classDef output fill:#FFFFFF,stroke:#AD1457,stroke-width:2px,color:#000;
+    %% ===== Adaptive Styles (No fixed background fill) =====
+    classDef client stroke:#1565C0,stroke-width:2px,fill:none;
+    classDef server stroke:#2E7D32,stroke-width:2px,fill:none;
+    classDef camera stroke:#EF6C00,stroke-width:2px,fill:none;
+    classDef output stroke:#AD1457,stroke-width:2px,fill:none;
 
     %% ===== Architecture Flow =====
     A["Client / AGV / App"] -->|HTTP Trigger| B["FastAPI Server"]
