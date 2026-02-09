@@ -40,6 +40,8 @@ current_fps: float = float(FPS_TARGET)
 # JPEG encode params
 ENCODE_PARAMS = [int(cv2.IMWRITE_JPEG_QUALITY), int(JPEG_QUALITY)]
 
+FPS_LOG_INTERVAL_SEC = 15.0
+
 
 def _camera_loop() -> None:
     global latest_frame_raw, running, current_fps
@@ -97,7 +99,7 @@ def _camera_loop() -> None:
             buffer.append((ts, enc))  # enc là numpy 1D (bytes)
 
         frame_count += 1
-        if frame_count >= 120:
+        if frame_count >= int(FPS_TARGET * FPS_LOG_INTERVAL_SEC):
             elapsed = time.time() - t_start
             if elapsed > 0:
                 current_fps = frame_count / elapsed
