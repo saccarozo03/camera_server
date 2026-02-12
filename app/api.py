@@ -9,16 +9,15 @@ import urllib.request
 
 from .logging_utils import log_queue, log
 from . import recorder, camera
+from .config import (
+    MOVE_FAIL_REASONS,
+    MOVES_URL,
+    POLL_ERROR_RETRY_DELAY_SEC,
+    POLL_INTERVAL_SEC,
+    POLL_REQUEST_TIMEOUT_SEC,
+    TRIGGER_ONLY_WHEN_CANCELLED,
+)
 
-# ==========================
-# AUTO TRIGGER CONFIG (tối thiểu)
-# ==========================
-MOVES_URL = "http://saccarozo04-ThinkBook-16-G8-IRL.local:8090/chassis/moves"
-POLL_INTERVAL = 0.5
-TRIGGER_ONLY_WHEN_CANCELLED = True
-
-# Chỉ lỗi "di chuyển không được" (navigation/planning/execution)
-MOVE_FAIL = {2,3,4,5,6,7, 8,9,10,11,12,13,14, 15,16,18, 701}
 
 _poll_task = None
 _armed = True          # fail_reason==0 -> True, lỗi hợp lệ -> trigger 1 lần rồi False
@@ -31,11 +30,11 @@ def _pick_latest_move(moves):
 
 async def poll_loop():
     global _armed
-    log(f"[INFO] Polling moves: {MOVES_URL} every {POLL_INTERVAL}s")
+    log(f"[INFO] Polling moves: {MOVES_URL} every {POLL_INTERVAL_SEC}s")
     while True:
         try:
             def fetch():
-                with urllib.request.urlopen(MOVES_URL, timeout=3) as resp:
+                with urllib.request.urlopen(MOVES_URL, timeout=POLL_REQUEST_TIMEOUT_SEC) as resp:
                     raw = resp.read().decode("utf-8", errors="ignore")
                     return json.loads(raw)
 
@@ -54,21 +53,21 @@ async def poll_loop():
                     _armed = True
 
                 # 2) lỗi di chuyển hợp lệ -> trigger 1 lần/đợt
-                elif _armed and fr in MOVE_FAIL and (not TRIGGER_ONLY_WHEN_CANCELLED or state == "cancelled"):
+                elif _armed and fr in MOVE_FAIL_REASONS and (not TRIGGER_ONLY_WHEN_CANCELLED or state == "cancelled"):
                     if not _lock.locked():
                         async with _lock:
                             ok, msg = recorder.trigger_event()
                             log(f"[TRIGGER-AUTO] state={state} fail_reason={fr} '{frs}' '{fmsg}' ok={ok} msg='{msg}'")
                     _armed = False
 
-            await asyncio.sleep(POLL_INTERVAL)
+            await asyncio.sleep(POLL_INTERVAL_SEC)
 
         except asyncio.CancelledError:
             log("[INFO] Poll loop cancelled")
             raise
         except Exception as e:
             log(f"[WARN] poll error: {type(e).__name__}: {e}")
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(POLL_ERROR_RETRY_DELAY_SEC)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -1,26 +1,84 @@
-# app/config.py
 import cv2
+from pathlib import Path
 
 # ==========================
-# CONFIG
+# RECORD WINDOW
 # ==========================
 PRE_SECONDS = 10
 POST_SECONDS = 20
 
-# FPS mục tiêu để set cho camera; FPS thực tế sẽ đo lại (thường ~21 với webcam của bạn)
-FPS_TARGET = 30
+# ==========================
+# CAMERA INPUT CONFIG
+# ==========================
+CAMERA_DEVICE_INDEX = 0
+CAMERA_BACKEND = cv2.CAP_V4L2
+CAMERA_CODEC = "MJPG"
+CAMERA_ENABLE_DRIVER_BUFFER_TUNING = True
+CAMERA_DRIVER_BUFFER_SIZE = 1
 
-# Độ phân giải capture
+# ==========================
+# CAMERA FRAME CONFIG
+# ==========================
+FPS_TARGET = 30
 FRAME_WIDTH = 1280
 FRAME_HEIGHT = 720
+FPS_LOG_INTERVAL_SEC = 15.0
 
-# Encoder MP4
-FOURCC = cv2.VideoWriter_fourcc(*"mp4v")
-
-# JPEG buffer settings (giảm RAM)
+# ==========================
+# JPEG BUFFER CONFIG
+# ==========================
 JPEG_QUALITY = 80
+JPEG_ENCODE_EXT = ".jpg"
 
 # Buffer headroom:
-# cần lớn để trong lúc recorder đang ghi PRE (mất vài giây) thì POST vẫn không bị overwrite
-# Ví dụ: giữ ~ (PRE + POST + 15) giây theo FPS_TARGET
+# đủ lớn để trong lúc recorder đang ghi PRE thì POST vẫn không bị overwrite.
 BUFFER_SECONDS_HEADROOM = PRE_SECONDS + POST_SECONDS + 15
+
+
+def get_buffer_maxlen() -> int:
+    return int(BUFFER_SECONDS_HEADROOM * FPS_TARGET)
+
+
+# ==========================
+# VIDEO WRITER CONFIG
+# ==========================
+VIDEO_FILE_EXTENSION = "mp4"
+VIDEO_FILENAME_PREFIX = "video"
+VIDEO_FOURCC = cv2.VideoWriter_fourcc(*"mp4v")
+
+# ==========================
+# STORAGE / SYNC CONFIG
+# ==========================
+LOCAL_VIDEO_DIR = Path("/mnt/ssd/camera_videos")
+REMOTE_ROOT_DIR = Path("/mnt/vision_new")
+SYNC_INTERVAL_SEC = 60
+SYNC_SCAN_DAYS_BACK = 1
+SYNC_SKIP_RECENT_FILE_SEC = 3
+
+# ==========================
+# AUTO-TRIGGER POLLER CONFIG
+# ==========================
+MOVES_URL = "http://saccarozo04-ThinkBook-16-G8-IRL.local:8090/chassis/moves"
+POLL_INTERVAL_SEC = 0.5
+POLL_REQUEST_TIMEOUT_SEC = 3
+POLL_ERROR_RETRY_DELAY_SEC = 1.0
+TRIGGER_ONLY_WHEN_CANCELLED = True
+MOVE_FAIL_REASONS = {
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    18,
+    701,
+}

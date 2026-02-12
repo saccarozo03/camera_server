@@ -63,6 +63,18 @@ camera_server/
 
 ---
 
+## Configuration
+
+Tất cả tham số quan trọng đã được gom vào `app/config.py` để dễ thay đổi khi đổi camera/input hoặc môi trường triển khai:
+
+- Camera input (`CAMERA_DEVICE_INDEX`, `CAMERA_BACKEND`, `CAMERA_CODEC`)
+- Capture profile (`FRAME_WIDTH`, `FRAME_HEIGHT`, `FPS_TARGET`)
+- Pre/Post buffer (`PRE_SECONDS`, `POST_SECONDS`, `BUFFER_SECONDS_HEADROOM`)
+- Sync storage (`LOCAL_VIDEO_DIR`, `REMOTE_ROOT_DIR`, `SYNC_*`)
+- Auto-trigger poller (`MOVES_URL`, `POLL_*`, `MOVE_FAIL_REASONS`)
+
+---
+
 ## Requirements
 
 - Python **3.10 – 3.11** (recommended)
@@ -86,5 +98,4 @@ python -m venv .venv
 ```powershell 
 pip install -r requirements.txt
 ---
-
 

@@ -5,11 +5,23 @@ import shutil
 import os
 from pathlib import Path
 from typing import Tuple, List, Any, Optional
-from datetime import datetime , timedelta
+from datetime import datetime, timedelta
 
 import cv2
 
-from .config import PRE_SECONDS, POST_SECONDS, FPS_TARGET, FOURCC
+from .config import (
+    FPS_TARGET,
+    LOCAL_VIDEO_DIR,
+    POST_SECONDS,
+    PRE_SECONDS,
+    REMOTE_ROOT_DIR,
+    SYNC_INTERVAL_SEC,
+    SYNC_SCAN_DAYS_BACK,
+    SYNC_SKIP_RECENT_FILE_SEC,
+    VIDEO_FILE_EXTENSION,
+    VIDEO_FILENAME_PREFIX,
+    VIDEO_FOURCC,
+)
 from .logging_utils import log
 from .camera import (
     get_current_fps,
@@ -21,12 +33,6 @@ from .camera import (
 # ==========================================================
 # PATHS
 # ==========================================================
-# Luu TReN SSD (CHIA THEO NgaY)
-LOCAL_VIDEO_DIR = Path("/mnt/ssd/camera_videos")
-
-# WINDOWS SHARE (PHẢI MOUNT VÀO ĐÂY)
-REMOTE_ROOT_DIR = Path("/mnt/vision_new")
-
 LOCAL_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 record_threads: List[threading.Thread] = []
@@ -68,39 +74,7 @@ def check_network() -> bool:
     return os.path.ismount(p) and os.access(p, os.W_OK)
 
 
-#def sync_pending_videos() -> None:
-    """
-    Quét SSD tìm các file chưa upload hoặc upload lỗi và đẩy lên Server.
-    (Minimal) - vẫn dùng rglob, nhưng skip file mới ghi (<3s).
-    """
-    #if not check_network():
-       # return
-
-   # for local_file in LOCAL_VIDEO_DIR.rglob("*.mp4"):
-        # Skip file vừa ghi xong để tránh copy khi file chưa "ổn định"
-       # try:
-           # if time.time() - local_file.stat().st_mtime < 3:
-               # continue
-       # except Exception:
-           # continue
-
-        #try:
-            # Ví dụ: local_file = /mnt/ssd/camera_videos/2026-02-03/video_123.mp4
-            # relative_path = 2026-02-03/video_123.mp4
-           # relative_path = local_file.relative_to(LOCAL_VIDEO_DIR)
-           # remote_path = REMOTE_ROOT_DIR / relative_path
-
-            # Nếu file chưa tồn tại trên remote hoặc size khác nhau -> copy lại
-           # if (not remote_path.exists()) or (remote_path.stat().st_size != local_file.stat().st_size):
-                #remote_path.parent.mkdir(parents=True, exist_ok=True)
-
-                #log(f"[SYNC] Uploading: {relative_path}")
-                #shutil.copy2(local_file, remote_path)
-                #log(f"[SYNC] Done: {relative_path}")
-
-        #except Exception as e:
-           # log(f"[SYNC][ERROR] {local_file.name}: {e}")
-def sync_pending_videos(days_back: int = 1) -> None:
+def sync_pending_videos(days_back: int = SYNC_SCAN_DAYS_BACK) -> None:
     """
     Chỉ đồng bộ các video trong N ngày gần nhất (mặc định 1 ngày gần nhất).
     days_back=1 -> quét hôm nay và hôm qua (buffer an toàn).
@@ -117,10 +91,10 @@ def sync_pending_videos(days_back: int = 1) -> None:
             targets.append(day_dir)
 
     for day_dir in targets:
-        for local_file in day_dir.rglob("*.mp4"):
+        for local_file in day_dir.rglob(f"*.{VIDEO_FILE_EXTENSION}"):
             # Skip file vừa ghi xong (tránh copy khi file chưa "ổn định")
             try:
-                if time.time() - local_file.stat().st_mtime < 3:
+                if time.time() - local_file.stat().st_mtime < SYNC_SKIP_RECENT_FILE_SEC:
                     continue
             except Exception:
                 continue
@@ -140,13 +114,13 @@ def sync_pending_videos(days_back: int = 1) -> None:
 
 
 def _background_sync_worker() -> None:
-    """Luồng chạy ngầm: mỗi 60s sync 1 lần, có thể stop bằng Event."""
+    """Luồng chạy ngầm: sync theo chu kỳ cấu hình, có thể stop bằng Event."""
     while not _sync_stop.is_set():
         try:
             sync_pending_videos()
         except Exception as e:
             log(f"[SYNC][CRITICAL] Worker error: {e}")
-        _sync_stop.wait(60)
+        _sync_stop.wait(SYNC_INTERVAL_SEC)
 
 
 def _copy_to_share(local_path: Path) -> Tuple[bool, str]:
@@ -189,9 +163,9 @@ def _record_event(pre_items: List[Tuple[float, Any]], width: int, height: int, a
     day_dir = LOCAL_VIDEO_DIR / day_str
     day_dir.mkdir(parents=True, exist_ok=True)
 
-    local_path = day_dir / f"video_{timestamp}.mp4"
+    local_path = day_dir / f"{VIDEO_FILENAME_PREFIX}_{timestamp}.{VIDEO_FILE_EXTENSION}"
 
-    writer = cv2.VideoWriter(str(local_path), FOURCC, fps, (width, height))
+    writer = cv2.VideoWriter(str(local_path), VIDEO_FOURCC, fps, (width, height))
     if not writer.isOpened():
         log("[ERROR] Cannot create local video file")
         return
