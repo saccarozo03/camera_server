@@ -7,13 +7,18 @@ from typing import Deque, List, Tuple, Optional, Any
 import cv2
 
 from .config import (
-    PRE_SECONDS,
-    POST_SECONDS,
+    CAMERA_BACKEND,
+    CAMERA_CODEC,
+    CAMERA_DEVICE_INDEX,
+    CAMERA_DRIVER_BUFFER_SIZE,
+    CAMERA_ENABLE_DRIVER_BUFFER_TUNING,
+    FPS_LOG_INTERVAL_SEC,
     FPS_TARGET,
-    FRAME_WIDTH,
     FRAME_HEIGHT,
+    FRAME_WIDTH,
+    JPEG_ENCODE_EXT,
     JPEG_QUALITY,
-    BUFFER_SECONDS_HEADROOM,
+    get_buffer_maxlen,
 )
 from .logging_utils import log
 
@@ -22,7 +27,7 @@ from .logging_utils import log
 # ======================================================
 # Buffer đủ lớn để giữ pre + phần post phát sinh trong lúc đang ghi pre
 # Dùng FPS_TARGET để tính upper bound; thực tế fps thấp hơn thì càng an toàn
-MAXLEN = int(BUFFER_SECONDS_HEADROOM * FPS_TARGET)
+MAXLEN = get_buffer_maxlen()
 
 buffer: Deque[Tuple[float, Any]] = deque(maxlen=MAXLEN)
 
@@ -40,23 +45,23 @@ current_fps: float = float(FPS_TARGET)
 # JPEG encode params
 ENCODE_PARAMS = [int(cv2.IMWRITE_JPEG_QUALITY), int(JPEG_QUALITY)]
 
-FPS_LOG_INTERVAL_SEC = 15.0
 
 
 def _camera_loop() -> None:
     global latest_frame_raw, running, current_fps
 
-    cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+    cap = cv2.VideoCapture(CAMERA_DEVICE_INDEX, CAMERA_BACKEND)
 
     # Giảm latency nếu driver hỗ trợ
-    try:
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-    except Exception:
-        pass
+    if CAMERA_ENABLE_DRIVER_BUFFER_TUNING:
+        try:
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, CAMERA_DRIVER_BUFFER_SIZE)
+        except Exception:
+            pass
 
     # Ép MJPG + resolution + FPS
-    mjpg_fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-    cap.set(cv2.CAP_PROP_FOURCC, mjpg_fourcc)
+    camera_fourcc = cv2.VideoWriter_fourcc(*CAMERA_CODEC)
+    cap.set(cv2.CAP_PROP_FOURCC, camera_fourcc)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
     cap.set(cv2.CAP_PROP_FPS, FPS_TARGET)
@@ -90,7 +95,7 @@ def _camera_loop() -> None:
         ts = time.time()
 
         # Encode JPEG để giảm RAM
-        ok, enc = cv2.imencode(".jpg", frame, ENCODE_PARAMS)
+        ok, enc = cv2.imencode(JPEG_ENCODE_EXT, frame, ENCODE_PARAMS)
         if not ok:
             continue
 
