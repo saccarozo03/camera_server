@@ -50,7 +50,7 @@ VIDEO_FOURCC = cv2.VideoWriter_fourcc(*"mp4v")
 # STORAGE / SYNC CONFIG
 # ==========================
 LOCAL_VIDEO_DIR = Path("/mnt/ssd/camera_videos")
-REMOTE_ROOT_DIR = Path("/mnt/vision_new")
+REMOTE_ROOT_DIR = Path("/mnt/vision_new1")
 SYNC_INTERVAL_SEC = 60
 SYNC_SCAN_DAYS_BACK = 1
 SYNC_SKIP_RECENT_FILE_SEC = 3
