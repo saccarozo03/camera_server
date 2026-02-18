@@ -31,12 +31,12 @@ JPEG_QUALITY = 80
 JPEG_ENCODE_EXT = ".jpg"
 
 # Buffer headroom:
-# đủ lớn để trong lúc recorder đang ghi PRE thì POST vẫn không bị overwrite.
+# du lon de trong luc recorder dang ghi PRE thi POST van khong bi overwrite.
 BUFFER_SECONDS_HEADROOM = PRE_SECONDS + POST_SECONDS + 15
 
 
 def get_buffer_maxlen() -> int:
-    return int(BUFFER_SECONDS_HEADROOM * FPS_TARGET)
+	return int(BUFFER_SECONDS_HEADROOM * FPS_TARGET)
 
 
 # ==========================
@@ -64,21 +64,21 @@ POLL_REQUEST_TIMEOUT_SEC = 3
 POLL_ERROR_RETRY_DELAY_SEC = 1.0
 TRIGGER_ONLY_WHEN_CANCELLED = True
 MOVE_FAIL_REASONS = {
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    18,
-    701,
+	2,
+	3,
+	4,
+	5,
+	6,
+	7,
+	8,
+	9,
+	10,
+	11,
+	12,
+	13,
+	14,
+	15,
+	16,
+	18,
+	701,
 }
