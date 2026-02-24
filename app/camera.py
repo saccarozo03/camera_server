@@ -12,6 +12,7 @@ from .config import (
 	CAMERA_DEVICE_INDEX,
 	CAMERA_DRIVER_BUFFER_SIZE,
 	CAMERA_ENABLE_DRIVER_BUFFER_TUNING,
+	CAMERA_SOURCE, # Thay doi source camera
 	FPS_LOG_INTERVAL_SEC,
 	FPS_TARGET,
 	FRAME_HEIGHT,
@@ -50,7 +51,7 @@ ENCODE_PARAMS = [int(cv2.IMWRITE_JPEG_QUALITY), int(JPEG_QUALITY)]
 def _camera_loop() -> None:
 	global latest_frame_raw, running, current_fps
 
-	cap = cv2.VideoCapture(CAMERA_DEVICE_INDEX, CAMERA_BACKEND)
+	cap = cv2.VideoCapture(CAMERA_SOURCE, CAMERA_BACKEND) # Them camera source 
 
 	# Giam latency neu driver ho tro
 	if CAMERA_ENABLE_DRIVER_BUFFER_TUNING:

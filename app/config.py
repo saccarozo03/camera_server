@@ -11,15 +11,18 @@ POST_SECONDS = 20
 # CAMERA INPUT CONFIG
 # ==========================
 CAMERA_DEVICE_INDEX = 0
-CAMERA_BACKEND = cv2.CAP_V4L2
+CAMERA_BACKEND = cv2.CAP_FFMPEG
 CAMERA_CODEC = "MJPG"
 CAMERA_ENABLE_DRIVER_BUFFER_TUNING = True
 CAMERA_DRIVER_BUFFER_SIZE = 1
 
+# RTSP URL cho camera Hikvision
+CAMERA_SOURCE = "rtsp://admin:Rtc%401234@192.168.0.69:554/Streaming/Channels/101"
+
 # ==========================
 # CAMERA FRAME CONFIG
 # ==========================
-FPS_TARGET = 30
+FPS_TARGET = 25
 FRAME_WIDTH = 1280
 FRAME_HEIGHT = 720
 FPS_LOG_INTERVAL_SEC = 15.0
@@ -27,7 +30,7 @@ FPS_LOG_INTERVAL_SEC = 15.0
 # ==========================
 # JPEG BUFFER CONFIG
 # ==========================
-JPEG_QUALITY = 80
+JPEG_QUALITY = 100
 JPEG_ENCODE_EXT = ".jpg"
 
 # Buffer headroom:
@@ -49,8 +52,13 @@ VIDEO_FOURCC = cv2.VideoWriter_fourcc(*"mp4v")
 # ==========================
 # STORAGE / SYNC CONFIG
 # ==========================
+# --- Linux ---
 LOCAL_VIDEO_DIR = Path("/mnt/ssd/camera_videos")
 REMOTE_ROOT_DIR = Path("/mnt/vision_new1")
+
+# --- Windows ---
+# LOCAL_VIDEO_DIR = Path("D:/RTC_PROJECT/Denso.25.007/video")
+# REMOTE_ROOT_DIR = Path("D:/RTC_PROJECT/Denso.25.007/video_remote")
 SYNC_INTERVAL_SEC = 60
 SYNC_SCAN_DAYS_BACK = 1
 SYNC_SKIP_RECENT_FILE_SEC = 3

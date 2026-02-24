@@ -67,11 +67,14 @@ def stop_sync_thread() -> None:
 # ==========================================================
 def check_network() -> bool:
 	"""
-	Windows Share phai duoc mount that va co quyen ghi.
-	Tranh truong hop folder local ton tai nhung mount da rot.
+	Kiem tra remote dir co ton tai va ghi duoc khong.
 	"""
 	p = str(REMOTE_ROOT_DIR)
+	# --- Linux ---
 	return os.path.ismount(p) and os.access(p, os.W_OK)
+
+	# --- Windows ---
+	# return os.path.exists(p) and os.access(p, os.W_OK)
 
 
 def sync_pending_videos(days_back: int = SYNC_SCAN_DAYS_BACK) -> None:
